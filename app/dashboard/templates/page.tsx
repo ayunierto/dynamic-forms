@@ -1,28 +1,46 @@
 'use client';
 
-import { PageContainer } from '@/components/dashboard/page-container';
+import {
+  PageContainer,
+  PageContainerDescription,
+  PageContainerHeader,
+  PageContainerLeftContent,
+  PageContainerRightContent,
+  PageContainerTitle,
+} from '@/components/dashboard/page-container';
 import { SiteHeader } from '@/components/dashboard/site-header';
-import { JsonEditor } from '@/components/editor/editor';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import Link from 'next/link';
 
 export default function Templates() {
   return (
     <>
-      <SiteHeader title="Templates" />
+      <SiteHeader title="Plantillas" />
 
-      <PageContainer
-        title="Templates"
-        description="Create and manage your templates here."
-        actionButtonText="Create New Template"
-        actionButtonOnClick={() => {
-          console.log('Create New Template clicked');
-        }}
-      >
-        <Card>
-          <CardContent>Test card</CardContent>
+      <PageContainer>
+        <PageContainerHeader>
+          <PageContainerLeftContent>
+            <PageContainerTitle>Plantillas</PageContainerTitle>
+            <PageContainerDescription>
+              Administra tus plantillas para formularios dinámicos.
+            </PageContainerDescription>
+          </PageContainerLeftContent>
+
+          <PageContainerRightContent>
+            <Button asChild>
+              <Link href={'/dashboard/templates/new'}>
+                Crear Nueva Plantilla
+              </Link>
+            </Button>
+          </PageContainerRightContent>
+        </PageContainerHeader>
+
+        <Card className="w-full">
+          <CardContent>
+            <p>Lista de plantillas</p>
+          </CardContent>
         </Card>
-
-        <JsonEditor />
       </PageContainer>
     </>
   );

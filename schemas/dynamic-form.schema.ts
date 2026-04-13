@@ -1,8 +1,12 @@
-import z from 'zod';
+import { z } from 'zod';
 
 export const templateSchema = z.object({
-  title: z.string(),
-  description: z.string(),
+  title: z
+    .string('El título es requerido')
+    .min(1, 'El título no puede estar vacío'),
+  description: z
+    .string('La descripción es requerida')
+    .min(1, 'La descripción no puede estar vacía'),
   sections: z.array(
     z.object({
       title: z.string(),
@@ -41,3 +45,9 @@ export const templateSchema = z.object({
 });
 
 export type Template = z.infer<typeof templateSchema>;
+
+export const jsonTemplateSchema = z.object({
+  jsonTemplate: templateSchema,
+});
+
+export type JsonTemplate = z.infer<typeof jsonTemplateSchema>;

@@ -13,14 +13,7 @@ export default function Page() {
     <>
       <SiteHeader title="Templates" />
 
-      <PageContainer
-        title="Templates"
-        description="Create and manage your templates here."
-        actionButtonText="Create New Template"
-        actionButtonOnClick={() => {
-          console.log('Create New Template clicked');
-        }}
-      >
+      <PageContainer>
         <SectionCards />
 
         <ChartAreaInteractive />
