@@ -2,6 +2,7 @@
 
 import { PageContainer } from '@/components/dashboard/page-container';
 import { SiteHeader } from '@/components/dashboard/site-header';
+import { JsonEditor } from '@/components/editor/editor';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function Templates() {
@@ -20,6 +21,8 @@ export default function Templates() {
         <Card>
           <CardContent>Test card</CardContent>
         </Card>
+
+        <JsonEditor />
       </PageContainer>
     </>
   );
