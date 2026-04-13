@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, DM_Sans } from 'next/font/google';
 import './globals.css';
 import { cn } from '@/lib/utils';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { ThemeProvider } from '@/components/theme-provider';
 
 const dmSans = DM_Sans({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -37,9 +38,17 @@ export default function RootLayout({
         'font-sans',
         dmSans.variable,
       )}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col">
-        <TooltipProvider>{children}</TooltipProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>{children}</TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

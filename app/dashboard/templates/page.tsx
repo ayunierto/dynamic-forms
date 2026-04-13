@@ -1,7 +1,26 @@
+'use client';
+
+import { PageContainer } from '@/components/dashboard/page-container';
+import { SiteHeader } from '@/components/dashboard/site-header';
+import { Card, CardContent } from '@/components/ui/card';
+
 export default function Templates() {
   return (
-    <div>
-      <h1 className="text-2xl font-bold">Templates</h1>
-    </div>
+    <>
+      <SiteHeader title="Templates" />
+
+      <PageContainer
+        title="Templates"
+        description="Create and manage your templates here."
+        actionButtonText="Create New Template"
+        actionButtonOnClick={() => {
+          console.log('Create New Template clicked');
+        }}
+      >
+        <Card>
+          <CardContent>Test card</CardContent>
+        </Card>
+      </PageContainer>
+    </>
   );
 }

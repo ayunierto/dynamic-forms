@@ -1,23 +1,12 @@
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
 
 export default function Home() {
   return (
-    <Card className="max-w-sm">
-      <CardHeader>
-        <CardTitle>Project Overview</CardTitle>
-        <CardDescription>
-          Track progress and recent activity for your Next.js app.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        Your design system is ready. Start building your next component.
-      </CardContent>
-    </Card>
+    <div className="flex-1 flex items-center justify-center">
+      <Button variant="outline" asChild>
+        <Link href="/dashboard">Entrar</Link>
+      </Button>
+    </div>
   );
 }
