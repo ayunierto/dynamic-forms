@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { Textarea } from '../ui/textarea';
 
 type PairConfig = {
@@ -24,11 +24,104 @@ const getPairByOpen = (key: string) =>
 
 const isSymmetricPair = (pair: PairConfig) => pair.open === pair.close;
 
+const escapeHtml = (text: string) =>
+  text.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
+
+const wrapToken = (className: string, value: string) =>
+  `<span class="${className}">${escapeHtml(value)}</span>`;
+
+const isWordCharacter = (char?: string) => Boolean(char?.match(/[A-Za-z0-9_]/));
+
+const matchNumberAt = (text: string, index: number) => {
+  const sliced = text.slice(index);
+  return sliced.match(/^-?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][+-]?\d+)?/);
+};
+
+const getStringEndIndex = (text: string, startIndex: number) => {
+  let index = startIndex + 1;
+
+  while (index < text.length) {
+    const char = text[index];
+    if (char === '\\') {
+      index += 2;
+      continue;
+    }
+    if (char === '"') return index + 1;
+    index += 1;
+  }
+
+  return text.length;
+};
+
+const getJsonHighlightHtml = (text: string) => {
+  let index = 0;
+  let html = '';
+
+  while (index < text.length) {
+    const current = text[index];
+
+    if (current === '"') {
+      const endIndex = getStringEndIndex(text, index);
+      const token = text.slice(index, endIndex);
+
+      let lookahead = endIndex;
+      while (lookahead < text.length && /\s/.test(text[lookahead])) {
+        lookahead += 1;
+      }
+
+      const isPropertyKey = text[lookahead] === ':';
+      html += wrapToken(
+        isPropertyKey
+          ? 'text-cyan-600 dark:text-cyan-400'
+          : 'text-emerald-600 dark:text-emerald-400',
+        token,
+      );
+      index = endIndex;
+      continue;
+    }
+
+    const numberMatch = matchNumberAt(text, index);
+    if (numberMatch) {
+      html += wrapToken('text-amber-600 dark:text-amber-400', numberMatch[0]);
+      index += numberMatch[0].length;
+      continue;
+    }
+
+    if (
+      (text.startsWith('true', index) && !isWordCharacter(text[index + 4])) ||
+      (text.startsWith('false', index) && !isWordCharacter(text[index + 5])) ||
+      (text.startsWith('null', index) && !isWordCharacter(text[index + 4]))
+    ) {
+      const literal = text.startsWith('false', index)
+        ? 'false'
+        : text.startsWith('true', index)
+          ? 'true'
+          : 'null';
+      html += wrapToken('text-rose-600 dark:text-rose-400', literal);
+      index += literal.length;
+      continue;
+    }
+
+    if ('{}[]():,'.includes(current)) {
+      html += wrapToken('text-muted-foreground', current);
+      index += 1;
+      continue;
+    }
+
+    html += escapeHtml(current);
+    index += 1;
+  }
+
+  return html || '&nbsp;';
+};
+
 export const JsonEditor = () => {
   const [value, setValue] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const highlightRef = useRef<HTMLPreElement>(null);
+  const lineNumbersRef = useRef<HTMLPreElement>(null);
 
   const TAB_SIZE = 4;
   const INDENT = ' '.repeat(TAB_SIZE);
@@ -89,6 +182,17 @@ export const JsonEditor = () => {
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const text = e.target.value;
     updateValue(text);
+  };
+
+  const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
+    const target = e.currentTarget;
+    if (highlightRef.current) {
+      highlightRef.current.scrollTop = target.scrollTop;
+      highlightRef.current.scrollLeft = target.scrollLeft;
+    }
+    if (lineNumbersRef.current) {
+      lineNumbersRef.current.scrollTop = target.scrollTop;
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -196,15 +300,52 @@ export const JsonEditor = () => {
     }
   };
 
+  const lineCount = useMemo(
+    () => Math.max(1, value.split('\n').length),
+    [value],
+  );
+  const lineNumbers = useMemo(
+    () => Array.from({ length: lineCount }, (_, i) => i + 1).join('\n'),
+    [lineCount],
+  );
+  const highlightedHtml = useMemo(() => getJsonHighlightHtml(value), [value]);
+
   return (
-    <>
-      <Textarea
-        ref={textareaRef}
-        value={value}
-        onChange={handleChange}
-        onKeyDown={handleKeyDown}
-      />
-      {error && <div style={{ color: 'red' }}>{error}</div>}
-    </>
+    <div className="space-y-2">
+      <div className="relative flex h-[28rem] overflow-hidden rounded-lg border border-input bg-background font-mono text-sm">
+        <pre
+          ref={lineNumbersRef}
+          aria-hidden
+          className="w-12 shrink-0 overflow-hidden border-r border-border bg-muted/40 px-2 py-2 text-right leading-6 text-muted-foreground select-none"
+        >
+          {lineNumbers}
+        </pre>
+
+        <div className="relative flex-1">
+          <pre
+            ref={highlightRef}
+            aria-hidden
+            className="pointer-events-none absolute inset-0 overflow-auto px-3 py-2 leading-6 whitespace-pre text-foreground"
+            dangerouslySetInnerHTML={{ __html: highlightedHtml }}
+          />
+
+          <Textarea
+            ref={textareaRef}
+            value={value}
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            onScroll={handleScroll}
+            spellCheck={false}
+            className="absolute inset-0 h-full resize-none overflow-auto rounded-none border-0 bg-transparent px-3 py-2 font-mono leading-6 text-transparent caret-foreground shadow-none focus-visible:ring-0 selection:bg-primary/20"
+          />
+        </div>
+      </div>
+
+      {error && (
+        <p className="text-sm text-destructive" role="alert">
+          {error}
+        </p>
+      )}
+    </div>
   );
 };
