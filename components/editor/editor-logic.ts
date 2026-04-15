@@ -8,7 +8,7 @@ export type EditorKeyAction = {
   cursor: number;
 };
 
-const TAB_SIZE = 4;
+const TAB_SIZE = 2;
 export const INDENT = ' '.repeat(TAB_SIZE);
 
 const PAIR_CONFIGS: PairConfig[] = [
@@ -67,7 +67,9 @@ export const getEditorKeyAction = (params: {
 
     return {
       value: insertText(value, start, end, insertion),
-      cursor: hasRangeSelection ? start + insertion.length : start + pair.open.length,
+      cursor: hasRangeSelection
+        ? start + insertion.length
+        : start + pair.open.length,
     };
   }
 

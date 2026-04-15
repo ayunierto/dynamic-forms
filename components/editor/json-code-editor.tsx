@@ -83,7 +83,10 @@ export const JsonCodeEditor = React.forwardRef<
     () => Array.from({ length: lineCount }, (_, index) => index + 1).join('\n'),
     [lineCount],
   );
-  const highlightedHtml = React.useMemo(() => getJsonHighlightHtml(value), [value]);
+  const highlightedHtml = React.useMemo(
+    () => getJsonHighlightHtml(value),
+    [value],
+  );
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) =>
     emitValueChange(event.target.value);
@@ -126,7 +129,7 @@ export const JsonCodeEditor = React.forwardRef<
     <div className={cn('space-y-2', wrapperClassName)}>
       <div
         className={cn(
-          'relative flex h-[28rem] overflow-hidden rounded-lg border border-input bg-background font-mono text-sm',
+          'relative flex h-112 overflow-hidden rounded-lg border border-input bg-background font-mono text-sm',
           editorClassName,
         )}
       >

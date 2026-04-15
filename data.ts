@@ -1,4 +1,4 @@
-import { Template } from './schemas/dynamic-form.schema';
+import { Template } from './features/templates/schemas/dynamic-form.schema';
 
 export const testTemplate: Template = {
   title: 'Test Template',
